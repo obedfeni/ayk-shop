@@ -5,7 +5,6 @@ import axios from 'axios';
 
 export const api = axios.create({ baseURL: '/api' });
 
-// Inject auth token into every request
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('ayk_token');
@@ -17,7 +16,7 @@ api.interceptors.request.use((config) => {
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
-      queries: { staleTime: 60_000, retry: 1 },
+      queries: { staleTime: 60000, retry: 1 },
     },
   }));
 
