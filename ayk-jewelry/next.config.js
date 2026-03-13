@@ -6,9 +6,7 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.cloudinary.com' },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['google-spreadsheet', 'google-auth-library', 'cloudinary'],
-  },
+  serverExternalPackages: ['google-spreadsheet', 'google-auth-library', 'cloudinary'],
 };
 
 module.exports = nextConfig;
