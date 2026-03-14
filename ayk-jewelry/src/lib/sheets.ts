@@ -7,12 +7,17 @@ export async function getSpreadsheet(): Promise<GoogleSpreadsheet> {
   if (cachedDoc) return cachedDoc;
 
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!;
-  const key = process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n');
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY!;
   const sheetId = process.env.GOOGLE_SHEET_ID!;
 
-  if (!email || !key || !sheetId) {
+  if (!email || !rawKey || !sheetId) {
     throw new Error('Missing Google Sheets environment variables');
   }
+
+  // Handle both formats: literal \n strings and real newlines
+  const key = rawKey.includes('\\n')
+    ? rawKey.replace(/\\n/g, '\n').replace(/^"|"$/g, '')
+    : rawKey.replace(/^"|"$/g, '');
 
   const auth = new JWT({
     email,
@@ -38,7 +43,6 @@ export function serializeVariants(variants: Array<{ name: string; price: number 
   return variants.map((v) => `${v.name}:${v.price}`).join(', ');
 }
 
-// Ensure sheets exist with correct headers
 export async function ensureSheets(doc: GoogleSpreadsheet) {
   const productHeaders = ['id', 'name', 'price', 'stock', 'image1', 'image2', 'image3', 'description', 'category', 'status', 'variants'];
   const orderHeaders = ['id', 'reference', 'name', 'phone', 'location', 'product_name', 'product_id', 'variant', 'quantity', 'amount', 'status', 'timestamp'];
