@@ -1,23 +1,25 @@
 import { JWT } from 'google-auth-library';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 
-let cachedDoc: GoogleSpreadsheet | null = null;
-
 export async function getSpreadsheet(): Promise<GoogleSpreadsheet> {
-  if (cachedDoc) return cachedDoc;
-
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!;
-  const rawKey = process.env.GOOGLE_PRIVATE_KEY!;
   const sheetId = process.env.GOOGLE_SHEET_ID!;
+  let key = process.env.GOOGLE_PRIVATE_KEY!;
 
-  if (!email || !rawKey || !sheetId) {
-    throw new Error('Missing Google Sheets environment variables');
+  if (!email || !key || !sheetId) {
+    throw new Error(`Missing env vars. email=${!!email} key=${!!key} sheetId=${!!sheetId}`);
   }
 
-  // Handle both formats: literal \n strings and real newlines
-  const key = rawKey.includes('\\n')
-    ? rawKey.replace(/\\n/g, '\n').replace(/^"|"$/g, '')
-    : rawKey.replace(/^"|"$/g, '');
+  // Strip surrounding quotes if present
+  key = key.replace(/^["']|["']$/g, '');
+
+  // Replace literal \n with real newlines
+  key = key.replace(/\\n/g, '\n');
+
+  // If key doesn't have proper header, it's malformed
+  if (!key.includes('-----BEGIN')) {
+    throw new Error('GOOGLE_PRIVATE_KEY is malformed - missing BEGIN header');
+  }
 
   const auth = new JWT({
     email,
@@ -27,7 +29,6 @@ export async function getSpreadsheet(): Promise<GoogleSpreadsheet> {
 
   const doc = new GoogleSpreadsheet(sheetId, auth);
   await doc.loadInfo();
-  cachedDoc = doc;
   return doc;
 }
 
@@ -46,7 +47,6 @@ export function serializeVariants(variants: Array<{ name: string; price: number 
 export async function ensureSheets(doc: GoogleSpreadsheet) {
   const productHeaders = ['id', 'name', 'price', 'stock', 'image1', 'image2', 'image3', 'description', 'category', 'status', 'variants'];
   const orderHeaders = ['id', 'reference', 'name', 'phone', 'location', 'product_name', 'product_id', 'variant', 'quantity', 'amount', 'status', 'timestamp'];
-
   if (!doc.sheetsByTitle['products']) {
     await doc.addSheet({ title: 'products', headerValues: productHeaders });
   }
