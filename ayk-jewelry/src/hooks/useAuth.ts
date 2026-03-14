@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { api } from '@/lib/queryClient';
+import { api } from '@/lib/api';
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
