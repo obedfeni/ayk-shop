@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSpreadsheet } from '@/lib/sheets';
 import { verifyToken, getTokenFromHeader } from '@/lib/auth';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const token = getTokenFromHeader(req.headers.get('authorization'));
   if (!token || !(await verifyToken(token))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   if (isNaN(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
   const { status } = await req.json();
@@ -23,7 +27,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const rows = await sheet.getRows();
     const row = rows.find((r) => Number(r.get('id')) === id);
     if (!row) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-
     row.set('status', status);
     await row.save();
     return NextResponse.json({ success: true });
