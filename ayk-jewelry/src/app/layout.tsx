@@ -7,12 +7,12 @@ import { Toaster } from 'react-hot-toast';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'AYK Jewelry — Luxury Jewelry Ghana',
-  description: 'Discover exquisite handcrafted jewelry. Rings, necklaces, bracelets and more. Fast delivery across Ghana.',
-  keywords: 'jewelry, Ghana, gold, rings, necklaces, bracelets, luxury',
+  title: 'AYK Accessorize With Yvon & Knottycraft Shop — Handmade Crochet & Jewelry Ghana',
+  description: 'Discover beautifully handcrafted crochet pieces and unique jewelry from AYK Accessorize With Yvon & Knottycraft. Shop handmade bags, clothing, accessories, rings, necklaces and more. Crafted with care in Ghana.',
+  keywords: 'crochet Ghana, handmade crochet, crochet bags, crochet clothing, handmade jewelry Ghana, rings, necklaces, bracelets',
   openGraph: {
-    title: 'AYK Jewelry',
-    description: 'Luxury handcrafted jewelry in Ghana',
+    title: 'AYK Accessorize With Yvon & Knottycraft Shop',
+    description: 'Handcrafted crochet creations and unique jewelry made with love in Ghana.',
     type: 'website',
   },
 };
