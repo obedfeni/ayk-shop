@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSpreadsheet } from '@/lib/sheets';
 import { verifyToken, getTokenFromHeader } from '@/lib/auth';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const token = getTokenFromHeader(req.headers.get('authorization'));
   if (!token || !(await verifyToken(token))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   if (isNaN(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
   try {
@@ -25,13 +29,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const token = getTokenFromHeader(req.headers.get('authorization'));
   if (!token || !(await verifyToken(token))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   const body = await req.json();
 
   try {
@@ -48,7 +56,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (body.name !== undefined) row.set('name', body.name);
     if (body.price !== undefined) row.set('price', body.price);
     await row.save();
-
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('PATCH /products/[id] error:', err);
