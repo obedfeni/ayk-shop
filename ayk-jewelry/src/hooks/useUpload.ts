@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { api } from '@/lib/queryClient';
+import { api } from '@/lib/api';
 
 export function useUpload() {
   const [isUploading, setIsUploading] = useState(false);
