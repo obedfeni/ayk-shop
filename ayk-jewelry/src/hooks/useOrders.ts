@@ -1,6 +1,6 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/queryClient';
+import { api } from '@/lib/api';
 import type { Order } from '@/types';
 
 export function useOrders() {
