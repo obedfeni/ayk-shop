@@ -42,7 +42,7 @@ async function sendEmailNotification(order: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'AYK Shop <ayk-shop@resend.dev>',
+      from: 'AYK Shop <onboarding@resend.dev>',
       to: [adminEmail],
       subject: `New Order ${order.reference} — ${order.productName}`,
       html: `
