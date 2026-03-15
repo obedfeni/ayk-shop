@@ -12,8 +12,16 @@ export async function PATCH(
   }
 
   const { id: rawId } = await params;
+
+  // Fix: reject null/undefined/NaN before hitting Google Sheets
+  if (!rawId || rawId === 'null' || rawId === 'undefined') {
+    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 });
+  }
+
   const id = Number(rawId);
-  if (isNaN(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+  if (isNaN(id) || id <= 0) {
+    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 });
+  }
 
   const { status } = await req.json();
   const validStatuses = ['Pending', 'Approved', 'Completed', 'Cancelled'];
