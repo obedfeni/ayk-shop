@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { X, Phone, User, MapPin, CheckCircle, MessageCircle } from 'lucide-react';
+import { X, Phone, User, MapPin, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -20,7 +20,6 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
   const [form, setForm] = useState({ name: '', phone: '', location: '', quantity: 1, variant: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [orderRef, setOrderRef] = useState('');
-  const [orderAmount, setOrderAmount] = useState(0);
   const createOrder = useCreateOrder();
   const product = selectedProduct;
   const selectedVariant = product?.variants?.find((v) => v.name === form.variant);
@@ -54,18 +53,10 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
         }],
       });
       setOrderRef(result.data?.reference ?? '');
-      setOrderAmount(total);
       setStep('success');
     } catch (err: any) {
       toast.error(err?.response?.data?.error || 'Order failed. Please try again.');
     }
-  };
-
-  const shareWhatsApp = () => {
-    const msg = encodeURIComponent(
-      `Hi! I just placed an order at ${BUSINESS.name}!\n\nRef: ${orderRef}\nProduct: ${product?.name}\nAmount: GHS ${orderAmount}\n\nPaying via MoMo to ${BUSINESS.momo} 💳`
-    );
-    window.open(`https://wa.me/?text=${msg}`, '_blank');
   };
 
   const close = () => {
@@ -89,6 +80,8 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
             transition={{ type: 'spring', damping: 28, stiffness: 200 }}
             className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto">
             <div className="p-6 min-h-full flex flex-col">
+
+              {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-serif font-bold" style={{ color: COLORS.text }}>
                   {step === 'success' ? '🎉 Order Confirmed!' : 'Complete Order'}
@@ -98,7 +91,7 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
                 </button>
               </div>
 
-              {/* Step 1: Product */}
+              {/* Step 1: Product preview */}
               {step === 'product' && product && (
                 <div className="space-y-5 flex-1">
                   <div className="bg-gray-50 rounded-2xl overflow-hidden aspect-video flex items-center justify-center">
@@ -111,29 +104,41 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
                       {product.category || 'Jewelry'}
                     </p>
                     <h3 className="text-xl font-serif font-semibold" style={{ color: COLORS.text }}>{product.name}</h3>
-                    {product.description && <p className="text-sm mt-1" style={{ color: COLORS.textSoft }}>{product.description}</p>}
-                    <p className="text-2xl font-bold mt-3" style={{ color: COLORS.danger }}>{BUSINESS.currency} {product.price}</p>
+                    {product.description && (
+                      <p className="text-sm mt-1" style={{ color: COLORS.textSoft }}>{product.description}</p>
+                    )}
+                    <p className="text-2xl font-bold mt-3" style={{ color: COLORS.danger }}>
+                      {BUSINESS.currency} {product.price}
+                    </p>
                   </div>
                   {product.variants?.length > 0 && (
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Select Option {errors.variant && <span className="text-red-500 ml-1">{errors.variant}</span>}
+                        Select Option{' '}
+                        {errors.variant && <span className="text-red-500 ml-1">{errors.variant}</span>}
                       </label>
                       <div className="flex flex-wrap gap-2">
                         {product.variants.map((v) => (
-                          <button key={v.name} onClick={() => setForm((p) => ({ ...p, variant: v.name }))}
-                            className={`px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all ${form.variant === v.name ? 'border-ayk-primary bg-amber-50 text-ayk-primary' : 'border-ayk-border hover:border-ayk-primary/50'}`}>
+                          <button key={v.name}
+                            onClick={() => setForm((p) => ({ ...p, variant: v.name }))}
+                            className={`px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all ${
+                              form.variant === v.name
+                                ? 'border-ayk-primary bg-amber-50 text-ayk-primary'
+                                : 'border-ayk-border hover:border-ayk-primary/50'
+                            }`}>
                             {v.name} — {BUSINESS.currency} {v.price}
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
-                  <Button onClick={() => setStep('form')} className="w-full" size="lg">Continue to Checkout →</Button>
+                  <Button onClick={() => setStep('form')} className="w-full" size="lg">
+                    Continue to Checkout →
+                  </Button>
                 </div>
               )}
 
-              {/* Step 2: Form */}
+              {/* Step 2: Order form */}
               {step === 'form' && product && (
                 <div className="space-y-4 flex-1">
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
@@ -145,10 +150,12 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
                   </div>
                   <Input label="Full Name" value={form.name}
                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                    error={errors.name} placeholder="Kwame Mensah" icon={<User className="w-4 h-4" />} />
+                    error={errors.name} placeholder="Kwame Mensah"
+                    icon={<User className="w-4 h-4" />} />
                   <Input label="Phone Number" value={form.phone}
                     onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                    error={errors.phone} placeholder="0541234567" icon={<Phone className="w-4 h-4" />} type="tel" />
+                    error={errors.phone} placeholder="0541234567"
+                    icon={<Phone className="w-4 h-4" />} type="tel" />
                   <Input label="Delivery Location" value={form.location}
                     onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
                     error={errors.location} placeholder="Accra, Kumasi, Takoradi..."
@@ -156,11 +163,17 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
                   <div>
                     <label className="block text-sm font-semibold text-ayk-text mb-1.5">Quantity</label>
                     <div className="flex items-center gap-3">
-                      <button onClick={() => setForm((p) => ({ ...p, quantity: Math.max(1, p.quantity - 1) }))}
-                        className="w-10 h-10 rounded-xl border border-ayk-border hover:bg-gray-50 text-xl font-bold transition-colors">−</button>
+                      <button
+                        onClick={() => setForm((p) => ({ ...p, quantity: Math.max(1, p.quantity - 1) }))}
+                        className="w-10 h-10 rounded-xl border border-ayk-border hover:bg-gray-50 text-xl font-bold transition-colors">
+                        −
+                      </button>
                       <span className="text-xl font-bold w-12 text-center">{form.quantity}</span>
-                      <button onClick={() => setForm((p) => ({ ...p, quantity: Math.min(50, p.quantity + 1) }))}
-                        className="w-10 h-10 rounded-xl border border-ayk-border hover:bg-gray-50 text-xl font-bold transition-colors">+</button>
+                      <button
+                        onClick={() => setForm((p) => ({ ...p, quantity: Math.min(50, p.quantity + 1) }))}
+                        className="w-10 h-10 rounded-xl border border-ayk-border hover:bg-gray-50 text-xl font-bold transition-colors">
+                        +
+                      </button>
                     </div>
                   </div>
                   <div className="flex gap-3 pt-2">
@@ -178,37 +191,28 @@ export function CartDrawer({ isOpen, onClose, selectedProduct, onClearSelection 
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-emerald-700">Order Placed!</h3>
 
-                  {/* Reference */}
+                  {/* Reference number */}
                   <div className="bg-gray-50 rounded-2xl p-4 w-full">
                     <p className="text-sm text-gray-500 mb-1">Your reference number</p>
                     <p className="text-lg font-mono font-bold" style={{ color: COLORS.text }}>{orderRef}</p>
                   </div>
 
-                  {/* Payment instruction */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 w-full text-left">
-                    <p className="font-semibold text-amber-900 mb-2">💳 Payment Instructions</p>
+                  {/* What happens next */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 w-full text-left space-y-2">
+                    <p className="font-semibold text-amber-900">What happens next?</p>
                     <p className="text-sm text-amber-800 leading-relaxed">
-                      We have received your order (<strong>{orderRef}</strong>).<br />
-                      Please make payment of <strong>{BUSINESS.currency} {orderAmount}</strong> via Mobile Money to:<br />
-                      <strong className="text-lg">📱 {BUSINESS.momo}</strong><br />
-                      Use your reference number as the payment note.
+                      ✅ We have received your order.<br /><br />
+                      We will contact you at <strong>{form.phone}</strong> shortly to confirm your order and send payment details.<br /><br />
+                      Delivery to <strong>{form.location}</strong> after payment is confirmed.
                     </p>
                   </div>
 
-                  <p className="text-ayk-text-soft text-sm">
-                    We will contact you at <strong>{form.phone}</strong> to confirm delivery to <strong>{form.location}</strong>.
-                  </p>
-
-                  {/* WhatsApp share */}
-                  <button onClick={shareWhatsApp}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
-                    style={{ backgroundColor: '#25D366' }}>
-                    <MessageCircle className="w-5 h-5" />Share via WhatsApp
-                  </button>
-
-                  <Button onClick={close} size="lg" variant="secondary" className="w-full">Continue Shopping</Button>
+                  <Button onClick={close} size="lg" className="w-full mt-4">
+                    Continue Shopping
+                  </Button>
                 </div>
               )}
+
             </div>
           </motion.div>
         </>
