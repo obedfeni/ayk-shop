@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { QueryProvider } from '@/lib/query-provider';
+import { QueryProvider } from '@/lib/queryClient';
 import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'AYK Accessorize With Yvon & Knottycraft Shop — Handmade Crochet & Jewelry Ghana',
-  description: 'Discover beautifully handcrafted crochet pieces and unique jewelry from AYK Accessorize With Yvon & Knottycraft. Shop handmade bags, clothing, accessories, rings, necklaces and more. Crafted with care in Ghana.',
-  keywords: 'crochet Ghana, handmade crochet, crochet bags, crochet clothing, handmade jewelry Ghana, rings, necklaces, bracelets',
+  title: 'Accessorize With Yvon & Knottycraft — Handmade Crochet & Jewelry Ghana',
+  description: 'Discover beautifully handcrafted crochet pieces and unique jewelry. Shop handmade bags, clothing, accessories, rings, necklaces and more. Crafted with care in Ghana.',
+  keywords: 'crochet Ghana, handmade crochet, crochet bags, handmade jewelry Ghana, rings, necklaces, bracelets',
   openGraph: {
-    title: 'AYK Accessorize With Yvon & Knottycraft Shop',
+    title: 'Accessorize With Yvon & Knottycraft',
     description: 'Handcrafted crochet creations and unique jewelry made with love in Ghana.',
     type: 'website',
   },
