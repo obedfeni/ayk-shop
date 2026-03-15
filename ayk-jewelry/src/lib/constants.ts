@@ -19,11 +19,20 @@ export const FONTS = {
 };
 
 export const BUSINESS = {
-  name: process.env.NEXT_PUBLIC_BUSINESS_NAME || 'AYK Jewelry',
-  phone: process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+233541234567',
-  currency: process.env.NEXT_PUBLIC_CURRENCY || 'GHS',
+  name: 'Accessorize With Yvon & Knottycraft',
+  shortName: 'AYK Shop',
+  phone: '+233541234567',
+  whatsapp: '233541234567',
+  currency: 'GHS',
+  momo: '+233541234567',
   maxImages: 3,
   maxQuantity: 50,
 };
 
-export const CATEGORIES = ['All', 'Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Sets'];
+export const CATEGORIES = [
+  'All',
+  'Crochet Product',
+  'Jewelry',
+  'Rings',
+  'Necklaces',
+];
