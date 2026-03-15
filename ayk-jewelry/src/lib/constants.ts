@@ -21,10 +21,10 @@ export const FONTS = {
 export const BUSINESS = {
   name: 'Accessorize With Yvon & Knottycraft',
   shortName: 'AYK Shop',
-  phone: '+233541234567',
-  whatsapp: '233541234567',
+  phone: '+233050726261',
+  whatsapp: '+23354565173',
   currency: 'GHS',
-  momo: '+233541234567',
+  momo: '+23354565173',
   maxImages: 3,
   maxQuantity: 50,
 };
