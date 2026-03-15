@@ -19,6 +19,57 @@ const OrderSchema = z.object({
   })).min(1),
 });
 
+async function sendEmailNotification(order: {
+  customerName: string;
+  phone: string;
+  location: string;
+  productName: string;
+  variant: string;
+  quantity: number;
+  amount: number;
+  reference: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!adminEmail || !resendKey) return;
+
+  const momoNumber = process.env.NEXT_PUBLIC_MOMO_NUMBER || '+233541234567';
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'AYK Shop <orders@aykshop.com>',
+      to: [adminEmail],
+      subject: `New Order ${order.reference} — ${order.productName}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px">
+          <div style="background:#D97706;padding:20px;border-radius:12px 12px 0 0;text-align:center">
+            <h1 style="color:white;margin:0;font-size:22px">New Order Received!</h1>
+            <p style="color:#FEF3C7;margin:6px 0 0">Accessorize With Yvon & Knottycraft</p>
+          </div>
+          <div style="background:#FFFBEB;padding:24px;border:1px solid #E7E5E4;border-top:none">
+            <table style="width:100%;border-collapse:collapse">
+              <tr><td style="padding:8px 0;color:#78716C;font-size:14px">Reference</td><td style="padding:8px 0;font-weight:bold;font-size:14px">${order.reference}</td></tr>
+              <tr style="background:#F5F5F4"><td style="padding:8px;color:#78716C;font-size:14px">Product</td><td style="padding:8px;font-size:14px">${order.productName} (${order.variant}) ×${order.quantity}</td></tr>
+              <tr><td style="padding:8px 0;color:#78716C;font-size:14px">Customer</td><td style="padding:8px 0;font-size:14px">${order.customerName}</td></tr>
+              <tr style="background:#F5F5F4"><td style="padding:8px;color:#78716C;font-size:14px">Phone</td><td style="padding:8px;font-size:14px">${order.phone}</td></tr>
+              <tr><td style="padding:8px 0;color:#78716C;font-size:14px">Location</td><td style="padding:8px 0;font-size:14px">${order.location}</td></tr>
+              <tr style="background:#FEF3C7"><td style="padding:8px;color:#92400E;font-size:16px;font-weight:bold">Amount</td><td style="padding:8px;color:#DC2626;font-size:20px;font-weight:bold">GHS ${order.amount}</td></tr>
+            </table>
+          </div>
+          <div style="background:#white;padding:16px;border:1px solid #E7E5E4;border-top:none;border-radius:0 0 12px 12px;text-align:center">
+            <p style="color:#78716C;font-size:13px;margin:0">Login to your admin panel to approve or cancel this order.</p>
+          </div>
+        </div>
+      `,
+    }),
+  }).catch(() => {});
+}
+
 export async function GET(req: NextRequest) {
   const token = getTokenFromHeader(req.headers.get('authorization'));
   if (!token || !(await verifyToken(token))) {
@@ -42,13 +93,13 @@ export async function GET(req: NextRequest) {
       timestamp: r.get('timestamp'),
       items: [{
         productId: Number(r.get('product_id')),
-        productName: r.get('product_name'),
-        variant: r.get('variant'),
-        quantity: Number(r.get('quantity')),
-        unitPrice: Number(r.get('amount')) / Number(r.get('quantity') || 1),
+        productName: r.get('product_name') || 'Unknown Product',
+        variant: r.get('variant') || 'Standard',
+        quantity: Number(r.get('quantity')) || 1,
+        unitPrice: Number(r.get('amount')) / (Number(r.get('quantity')) || 1),
         image: '',
       }],
-    })).filter((o) => o.reference).reverse();
+    })).filter((o) => o.reference && o.id).reverse();
 
     return NextResponse.json({ success: true, data: orders });
   } catch (err) {
@@ -110,7 +161,19 @@ export async function POST(req: NextRequest) {
       await productRow.save();
     }
 
-    // Telegram notification (optional)
+    // Email notification
+    await sendEmailNotification({
+      customerName: data.customerName,
+      phone: data.phone,
+      location: data.location,
+      productName: item.productName,
+      variant: item.variant || 'Standard',
+      quantity: item.quantity,
+      amount,
+      reference,
+    });
+
+    // Telegram notification
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     if (botToken && chatId) {
